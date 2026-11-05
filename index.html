@@ -333,6 +333,7 @@
         <a href="#ship"><b>07</b><span>验收与下一步</span></a>
         <a href="#fde-track"><b>FDE</b><span>FDE 方向</span></a>
         <a href="#interview"><b>面</b><span>面试备战</span></a>
+        <a href="#field-stories"><b>实</b><span>前辈翻车实录</span></a>
       </nav>
       <p class="rail-foot">每次学 45–90 分钟<br>先跑通，再优化。</p>
     </aside>
@@ -353,6 +354,7 @@
           <option value="#ship">07 · 验收与下一步</option>
           <option value="#fde-track">FDE 方向 · AI 落地最后一公里</option>
           <option value="#interview">面试备战 · 74 题索引</option>
+          <option value="#field-stories">前辈翻车实录 · 别人的开发经历</option>
         </select>
       </div>
 
@@ -1044,6 +1046,43 @@ app.listen(3001, () =&gt; console.log(<span class="str">"API: http://localhost:3
               </div>
             </section>
           </section>
+
+            <section class="section" id="field-stories">
+              <div class="section-head"><span class="num">实</span><h2>前辈翻车实录：别人的开发经历</h2><p>教程教你怎么做；这一栏收的是别人真金白银踩出来的坑。先看别人怎么翻车的，再决定自己的第一步往哪踩。</p></div>
+
+              <section class="interview-subsection" aria-labelledby="story-1-title">
+                <h3 id="story-1-title">34 岁后端裸辞，踩坑一年才站稳</h3>
+                <p>8 年 Java / Go 后端，34 岁裸辞入局 AI Agent。翻车三件套：自研初代 Agent 上线，幻觉严重，随便一问就编造虚假数据；辛苦做的 RAG 知识库检索答非所问，直接丢了客户订单；技术面次次通关，却因「无成熟 AI 落地经验」卡在 HR 面。熬了一年，负责的企业智能客服 Agent 日均稳定处理 3000+ 用户会话，帮企业砍掉 60% 人工成本，才算站稳。</p>
+                <ul class="prompt-list">
+                  <li><strong>坑 1：盲目追求全自动，Agent 权限失控</strong><span>用户随口指令就触发退款、数据修改等高风险操作。教训：资金、权限、删除类高危操作必须保留人工确认节点，人机协同优先，不盲目全自动。</span></li>
+                  <li><strong>坑 2：新手阶段硬啃多智能体</strong><span>拆分多个职能智能体，结果通信报错、上下文断裂、任务卡死，三周零产出。教训：先吃透单 Agent + 多工具，90% 企业场景完全够用。</span></li>
+                  <li><strong>内行解法：售后退货 Agent（日均 5000 单、响应 ≤ 30 秒、月调用成本 ≤ 2 万）</strong><span>分级路由——简单退货走规则引擎零成本响应，复杂场景才调大模型；Redis 缓存固定政策避免重复调用；生成单据、仓库通知等后置操作丢入消息队列异步解耦；模型推理超时自动切规则兜底，保证服务不崩。</span></li>
+                </ul>
+                <p class="source-line">原文：<a href="https://adg.csdn.net/6a87aa48662f9a54cb9f0d81.html" target="_blank" rel="noopener noreferrer">《35岁后端血泪忠告，这3类人别硬转Agent》</a>（CSDN）</p>
+              </section>
+
+              <section class="interview-subsection" aria-labelledby="story-2-title">
+                <h3 id="story-2-title">Go 后端 3 个月，月薪 28k → 45k</h3>
+                <p>3 年 Go 后端，月薪 28k，年底裁员；投 50 份简历、面 5 家、0 offer。花 3 个月转型：第 1 个月不碰框架，用原生 API 手写 50 行最小 Agent 循环，先搞懂 Agent 为什么会在工程上「坏掉」（死循环、上下文爆炸、过早终止），并理解 Prompt Caching 怎么省钱；第 2 个月吃透 LangGraph，做自动日志分析 Agent 和自动 Code Review Agent，每个都把重试、权限、超时、人工接管做进去；第 3 个月补评测集、回归测试和成本面板。第 6 周开始投简历，拿 2 个 offer，选了 45k 的那个。</p>
+                <ul class="prompt-list">
+                  <li><strong>核心观点：Agent 工程的核心不是 Prompt，是系统能力</strong><span>工具编排、状态管理、失败重试、人工接管、权限边界、成本、观测——Demo 谁都能跑，让 Agent 在真实业务里不出错是另一回事。</span></li>
+                  <li><strong>前端的机会在 Agent 交互层</strong><span>真正有竞争力的 Agent UI 不是聊天框，而是操作台：展示 Agent 的计划、状态、证据、审批、撤销、重试和异常。不用跟后端卷 Agent runtime，但可以决定用户怎么跟 Agent 打交道。</span></li>
+                </ul>
+                <p class="source-line">原文：<a href="https://adg.csdn.net/6a61859d662f9a54cb936d30.html" target="_blank" rel="noopener noreferrer">《3个月月薪从28k涨到45k的AI Agent转型指南》</a>（CSDN）</p>
+              </section>
+
+              <section class="interview-subsection" aria-labelledby="story-3-title">
+                <h3 id="story-3-title">Agent 落地没有魔法，只有实施</h3>
+                <p>把 Agent 内嵌进业务流程、交付完整结果，落地方式和实施一套 SaaS 系统本质上没有区别：不是接个 API、写个 Prompt 就能跑起来，需要对业务流程和业务本身做深入研究、梳理和建模，指望 Agent 自己理解业务是不现实的。</p>
+                <ul class="prompt-list">
+                  <li><strong>翻车根源：老板认知错位</strong><span>张口闭口聊 Agent，想象的是「装上去就能用」，实际要做的是一场小型数字化实施。认知和现实的落差，正是大量项目失败或烂尾的根源。</span></li>
+                  <li><strong>实操视角：拆成十个节点验收</strong><span>从场景选型、数据就绪度，到每个节点的验收标准；Agent 实施翻车，十次有九次不是模型不行，是业务建模的节点没过就急着上 Agent。预期管理的本质，是把「Agent 能做什么」翻译成每个节点可验收的标准，而不是开工前的一句口号。</span></li>
+                </ul>
+                <p class="source-line">原文：<a href="https://www.v2ex.com/t/1253925" target="_blank" rel="noopener noreferrer">《Agent 落地没有魔法，只有实施！》</a>（V2EX，2026-11-02）</p>
+              </section>
+
+              <p class="source-line">以上为公开文章的要点整理，完整内容见原文链接。本栏持续更新中。</p>
+            </section>
         </div>
       </main>
 
