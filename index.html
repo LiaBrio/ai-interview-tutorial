@@ -186,6 +186,11 @@
     .interview-table td > * { min-width: 0; }
     .interview-table td strong, .interview-table a { overflow-wrap: anywhere; }
     .interview-table a { color: var(--accent); }
+    .jobs-filter { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 8px; }
+    .jobs-filter select, .jobs-filter input { font: inherit; font-size: 14px; padding: 9px 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+    .jobs-filter input { flex: 1; min-width: 180px; }
+    .jobs-meta { margin: 0 0 18px; color: var(--muted); font-size: 14px; }
+    .jobs-count { margin: 0 0 12px; color: var(--muted); font-size: 13px; }
     .prompt-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); }
     .prompt-list li { padding: 16px 18px; background: var(--surface); }
     .prompt-list strong { display: block; margin-bottom: 4px; }
@@ -334,6 +339,7 @@
         <a href="#fde-track"><b>FDE</b><span>FDE 方向</span></a>
         <a href="#interview"><b>面</b><span>面试备战</span></a>
         <a href="#field-stories"><b>实</b><span>前辈翻车实录</span></a>
+        <a href="#jobs"><b>岗</b><span>岗位扫描</span></a>
       </nav>
       <p class="rail-foot">每次学 45–90 分钟<br>先跑通，再优化。</p>
     </aside>
@@ -355,6 +361,7 @@
           <option value="#fde-track">FDE 方向 · AI 落地最后一公里</option>
           <option value="#interview">面试备战 · 74 题索引</option>
           <option value="#field-stories">前辈翻车实录 · 别人的开发经历</option>
+          <option value="#jobs">岗位扫描 · 杭州 + 西安 AI 岗</option>
         </select>
       </div>
 
@@ -1083,6 +1090,33 @@ app.listen(3001, () =&gt; console.log(<span class="str">"API: http://localhost:3
 
               <p class="source-line">以上为公开文章的要点整理，完整内容见原文链接。本栏持续更新中。</p>
             </section>
+
+            <section class="section" id="jobs">
+              <div class="section-head"><span class="num">岗</span><h2>岗位扫描：杭州 + 西安 AI 岗</h2><p>每 48 小时自动扫描猎聘、拉勾、51job、牛客，只收薪资上限 ≥ 20k 的 AI 应用开发、大模型应用开发、AI Agent、FDE、RAG 岗位。先看市场再投简历，同一个能力在不同城市、不同方向的价格差很多。</p></div>
+              <p class="jobs-meta" id="jobsMeta">岗位数据加载中…</p>
+              <div class="jobs-filter">
+                <select id="jobCity" aria-label="按城市筛选">
+                  <option value="">全部城市</option>
+                  <option value="杭州">杭州</option>
+                  <option value="西安">西安</option>
+                </select>
+                <select id="jobKeyword" aria-label="按方向筛选">
+                  <option value="">全部方向</option>
+                  <option value="AI应用开发">AI 应用开发</option>
+                  <option value="大模型应用开发">大模型应用开发</option>
+                  <option value="AI Agent">AI Agent</option>
+                  <option value="FDE">FDE</option>
+                  <option value="RAG">RAG</option>
+                </select>
+                <input id="jobSearch" type="search" placeholder="搜职位名或公司" aria-label="搜索职位名或公司">
+              </div>
+              <p class="jobs-count" id="jobsCount"></p>
+              <table class="interview-table" id="jobsTable" aria-label="杭州与西安 AI 岗位清单">
+                <thead><tr><th>职位</th><th>公司</th><th>城市</th><th>薪资</th><th>方向</th><th>来源</th></tr></thead>
+                <tbody id="jobsBody"><tr><td colspan="6">岗位数据加载中…</td></tr></tbody>
+              </table>
+              <p class="source-line">数据来源：猎聘、拉勾、51job、牛客公开招聘信息。公司质地：🟢 真在发育 · 🟡 信息不足或中性 · ⏳ 本轮未核查（公开信息核查，仅供参考）。投递前请核实原帖。</p>
+            </section>
         </div>
       </main>
 
@@ -1124,6 +1158,50 @@ app.listen(3001, () =&gt; console.log(<span class="str">"API: http://localhost:3
         }, { rootMargin: '-20% 0px -68% 0px' });
         sections.forEach(function (section) { if (section) observer.observe(section); });
       }
+    }());
+
+    (function () {
+      var body = document.getElementById('jobsBody');
+      var meta = document.getElementById('jobsMeta');
+      var count = document.getElementById('jobsCount');
+      var citySel = document.getElementById('jobCity');
+      var kwSel = document.getElementById('jobKeyword');
+      var search = document.getElementById('jobSearch');
+      if (!body) return;
+      var all = [];
+      function esc(s) {
+        return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+      }
+      function render() {
+        var city = citySel.value, kw = kwSel.value;
+        var q = search.value.trim();
+        var rows = all.filter(function (j) {
+          if (city && j.city !== city) return false;
+          if (kw && j.keyword !== kw) return false;
+          if (q && (j.title + j.company).indexOf(q) === -1) return false;
+          return true;
+        });
+        count.textContent = '共 ' + rows.length + ' 条（全部 ' + all.length + ' 条）';
+        body.innerHTML = rows.map(function (j) {
+          var title = j.link ? '<a href="' + esc(j.link) + '" target="_blank" rel="noopener noreferrer">' + esc(j.title) + '</a>' : esc(j.title);
+          var company = (j.q ? esc(j.q) + ' ' : '') + esc(j.company);
+          var place = j.area ? (j.area.indexOf(j.city) === 0 ? esc(j.area) : esc(j.city) + ' · ' + esc(j.area)) : esc(j.city);
+          return '<tr><td data-label="职位">' + title + '</td><td data-label="公司">' + company + '</td><td data-label="城市">' + place + '</td><td data-label="薪资">' + esc(j.salary) + '</td><td data-label="方向">' + esc(j.keyword) + '</td><td data-label="来源">' + esc(j.source) + '</td></tr>';
+        }).join('') || '<tr><td colspan="6">没有符合条件的岗位，换个筛选试试。</td></tr>';
+      }
+      fetch('jobs.json').then(function (r) { return r.json(); }).then(function (d) {
+        all = d.jobs || [];
+        var m = d.meta || {};
+        meta.textContent = '在招 ' + m.total + ' 个岗位（杭州 ' + m.hangzhou + ' · 西安 ' + m.xian + '），数据更新于 ' + m.updated + '，每 48 小时自动刷新。';
+        render();
+      }).catch(function () {
+        meta.textContent = '岗位数据暂不可用，请稍后刷新页面。';
+        body.innerHTML = '<tr><td colspan="6">岗位数据加载失败。</td></tr>';
+      });
+      [citySel, kwSel].forEach(function (el) { el.addEventListener('change', render); });
+      search.addEventListener('input', render);
     }());
   </script>
 </body>
